@@ -3,7 +3,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class Main {
-    public static void main(String[] args) throws IOException, ClassNotFoundException {
+    public static void main(String[] args) throws IllegalArgumentException {
         byte[] intermediate = null;
         try (
                 ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -27,9 +27,9 @@ public class Main {
 
     }
 
-    public static Animal[] deserializeAnimalArray(byte[] data) {
+    public static Animal[] deserializeAnimalArray(byte[] data) throws IllegalArgumentException {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
-        Animal[] animal = null;
+        Animal[] animal;
         try {
             ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
             int animalCount = objectInputStream.readInt();
@@ -38,34 +38,20 @@ public class Main {
             for (int i = 0; i < animalCount; i++) {
                 animal[i] = (Animal) objectInputStream.readObject();
             }
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        } catch (ClassNotFoundException e) {
-            throw new IllegalStateException(e);
+        } catch (IOException | ClassNotFoundException | ClassCastException | ArrayIndexOutOfBoundsException
+                | NegativeArraySizeException | IllegalArgumentException e) {
+            throw new IllegalArgumentException(e.getMessage());
         }
         return animal;
     }
 
-    public class IllegalArgumentException extends Exception {
-        private int number;
-
-        public int getNumber() {
-            return number;
-        }
-
-        public IllegalArgumentException(String message, int num) {
-            super(message);
-            number = num;
-        }
-    }
-
     static class Animal implements Serializable {
+
         private final String name;
 
         public Animal(String name) {
             this.name = name;
         }
-
         @Override
         public boolean equals(Object obj) {
             if (obj instanceof Animal) {
@@ -73,5 +59,14 @@ public class Main {
             }
             return false;
         }
+
     }
 }
+/*
+
+    public static class IllegalArgumentException extends Exception {
+        public IllegalArgumentException(String message) {
+            super(message);
+        }
+    }
+*/
